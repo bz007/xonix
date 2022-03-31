@@ -44,9 +44,11 @@ function love.load()
     background_music = love.audio.newSource("res/bg00.ogg", "stream")
     -- background_music = love.audio.newSource("bg03.mp3", "stream")
     background_music:setLooping(true)
-    background_music:setVolume(.2)
-    love.audio.play(background_music)
 
+    background_music:setVolume(config.volume)
+    if config.music then love.audio.play(background_music) end
+
+    love.window.setFullscreen(config.fullscreen)
     love.resize(love.graphics.getDimensions())
 
     game = Game:New()
@@ -128,26 +130,41 @@ end
 
 
 function saveconfig()
-    local s = ""
-
-    for i = 1, #hiscore do
-        s = s .. hiscore[i]..';'
-    end
-
-    love.filesystem.write('xonix.ini', s)
+    love.filesystem.write('xonix.cfg', serialize(config))
 end
 
 
 function loadconfig()
-    hiscore = {0,0,0,0,0}
+    config = {  hiscore={{0,"",""}, {0,"",""}, {0,"",""}, {0,"",""}, {0,"",""}},
+                volume=.2, music=true, fullscreen=false, control="kbd"}
     
-    if love.filesystem.getInfo('xonix.ini') then
+    if love.filesystem.getInfo('xonix.cfg') then
 
-        local s = love.filesystem.read('xonix.ini')
-        local p = s:split(';')
+        local s = love.filesystem.read('xonix.cfg')
+        local p = load("return "..s)()
 
-        for i = 1,#hiscore do
-            hiscore[i] = tonumber(p[i])
+        for k,v in pairs(p) do
+            config[k] = v
         end
     end
+end
+
+
+function serialize(o, prefix)
+    local pre = prefix or "  "
+    local s = ""
+    if type(o) == "number" or type(o) == "boolean" then
+        s = s..tostring(o)
+    elseif type(o) == "string" then
+        s = s..string.format("%q", o)
+    elseif type(o) == "table" then
+        s = s.."{\n"
+        for k,v in pairs(o) do
+            s = s..pre.."["..serialize(k).."] = "..serialize(v, pre.."  ")..",\n"
+        end
+        s = s..pre.."}"
+    else
+        error("cannot serialize a " .. type(o))
+    end
+    return s
 end

@@ -109,21 +109,19 @@ function Game:Over()
         return
     end
 
-    print('gamover', lives)
-
 	context = home
 
     Dialog:New('GAME ', 'OVER!')
 
     hiscore_ptr = 0
-    if score > hiscore[#hiscore] then
+    if score > config.hiscore[#config.hiscore][1] then
 
         -- обновить таблицу результатов
-        for i = #hiscore, 1, -1 do
-            if hiscore[i] < score then hiscore_ptr = i end
+        for i = #config.hiscore, 1, -1 do
+            if config.hiscore[i][1] < score then hiscore_ptr = i end
         end
-        table.insert(hiscore, hiscore_ptr, score)
-        table.remove(hiscore)
+        table.insert(config.hiscore, hiscore_ptr, {score, "", os.date("%d.%m.%Y")})
+        table.remove(config.hiscore)
         saveconfig()
     end
 

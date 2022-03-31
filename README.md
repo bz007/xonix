@@ -1,6 +1,6 @@
 # Xonix 
 
-Xonix game implementation in Lua on wonderfull LOVE framework. Hacked on holidays in end of March, 2022.
+Xonix game implementation in Lua on wonderfull [LÖVE](https://love2d.org/) framework. Hacked on holidays in end of March, 2022.
 
 
 ## Just some copyright notices

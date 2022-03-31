@@ -26,6 +26,8 @@ function Dialog:Draw()
     n = math.floor(self.state * 2) % 2
     msg = {color[1+n], self.msg1, color[2-n], self.msg2}
 
+    self.context_save:Draw()
+
     love.graphics.setColor(.7, .7, .7)
     love.graphics.rectangle('fill', screen.width/8, screen.height/4, screen.width*3/4, screen.height/2)
 
