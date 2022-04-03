@@ -25,7 +25,7 @@ function Home:Draw()
     love.graphics.setFont(fontS)
     love.graphics.setColor(.3, .9, .2, .3)
     -- подсказка по клавишам
-    love.graphics.printf('[Enter] start [M]usic on/off [F]ull screen [Q]uit © bz, 2022',
+    love.graphics.printf('[FIRE] start [M]usic on/off [F]ull screen [Q]uit © bz, 2022',
         0, screen.height-fontS:getHeight(), screen.width, 'center')
 
     love.graphics.setFont(font)
@@ -51,11 +51,8 @@ end
 function Home:Event(key)
 	if key == 'return' then
 
-		level = 1
-		score = 0
-		lives = 3
-		game:Init(level)
-		context = game
+		Game:Start('kbd')
+
 	elseif key == 'f' then
 		love.window.setFullscreen(not love.window.getFullscreen())
 		local fullscreen = love.window.getFullscreen()
@@ -96,3 +93,13 @@ function Home:Event(key)
 	end
 end
 
+
+active_joystick = {}
+function Home:gamepadpressed(joystick, button)
+
+	if button == 'a' then
+		active_joystick = joystick
+		Game:Start('js')
+	end
+
+end

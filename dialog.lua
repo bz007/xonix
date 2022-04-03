@@ -35,7 +35,7 @@ function Dialog:Draw()
     love.graphics.printf(msg, 0, screen.height*2/5, screen.width, 'center')
 
     love.graphics.setFont(font)
-    love.graphics.printf({{0,0,1}, 'press Enter'}, screen.width/4, screen.height*5/8, screen.width/2, 'center')
+    love.graphics.printf({{0,0,1}, 'press FIRE'}, screen.width/4, screen.height*5/8, screen.width/2, 'center')
 
 end
 
@@ -59,4 +59,11 @@ function Dialog:Event(key)
 		love.event.quit()
 	end
 
+end
+
+
+function Dialog:gamepadpressed(joystick, button)
+    if button == 'a' then
+        context = self.context_save
+    end
 end

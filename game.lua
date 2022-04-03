@@ -128,6 +128,22 @@ function Game:Over()
 end
 
 
+function Game:Start(control)
+
+    self.control = control
+
+    level = 1
+    score = 0
+    lives = 3
+
+    game:Init(level)
+
+    context = game
+
+end
+
+
+
 function Game:Init(level)
 
     -- инициализация поля
@@ -163,6 +179,57 @@ function Game:Init(level)
 
 end
 
+
+function Game:gamepadpressed(joystick, button)
+    if self.control == 'js' and active_joystick == joystick then
+        if button == 'a' then
+            Dialog:New('Pause', ' Wait!')
+        end
+    end
+end
+
+
+local ax = {leftx=0, lefty=0, rightx=0, righty=0}
+local joystick_limit = .8
+
+function Game:gamepadaxis(joystick, axis, value)
+
+    if self.control == 'js' and active_joystick == joystick then
+        ax[axis] = value
+        -- print(string.format("Gamepad %s axis: %s, %s", joystick:getName(), axis, value))
+        if math.abs(ax.leftx) < joystick_limit then
+            if ax.lefty > joystick_limit then
+                player.dir = DIR_DN
+            elseif ax.lefty < -joystick_limit then
+                player.dir = DIR_UP
+            end
+        end
+        if math.abs(ax.lefty) < joystick_limit then
+            if ax.leftx > joystick_limit then
+                player.dir = DIR_RT
+            elseif ax.leftx < -joystick_limit then
+                player.dir = DIR_LT
+            end
+        end
+
+        if math.abs(ax.rightx) < joystick_limit then
+            if ax.righty > joystick_limit then
+                player.dir = DIR_DN
+            elseif ax.righty < -joystick_limit then
+                player.dir = DIR_UP
+            end
+        end
+        if math.abs(ax.righty) < joystick_limit then
+            if ax.rightx > joystick_limit then
+                player.dir = DIR_RT
+            elseif ax.rightx < -joystick_limit then
+                player.dir = DIR_LT
+            end
+        end
+
+    end
+
+end
 
 -- =================== полезные вспомогательные фукции ===================
 

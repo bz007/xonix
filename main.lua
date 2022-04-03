@@ -4,12 +4,12 @@
 
 ]]--
 
-MAX_X = 60
-MAX_Y = 44
+MAX_X = 60 -- ширина игрового поля
+MAX_Y = 44 -- высота игрового поля
 
-DOT_SPEED     = 10 -- клеток в секунду
-DOT_SPEED_VAR = 10
-PLAYER_SPEED  = 15
+DOT_SPEED     = 10 -- скорость точек, клеток в секунду
+DOT_SPEED_VAR = 10 -- вариация скорости
+PLAYER_SPEED  = 15 -- скорость игрока
 
 -- содержимое клеток на поле
 F_NONE  = 0  -- пустая
@@ -73,23 +73,17 @@ function love.keypressed(key)
     context:Event(key)
 end
 
-ax = {}
+
 function love.gamepadaxis(joystick, axis, value)
-    ax[axis] = value
-    -- print(string.format("Gamepad axis: %s, %s", axis, value))
+
+    (context.gamepadaxis or noop)(context, joystick, axis, value)
+
 end
 
-local active_joystick
 function love.gamepadpressed(joystick, button)
 
-    if joystick == active_joystick then
-        print(string.format("Gamepad button:%s.", button))
-        return
-    end
-    active_joystick = joystick
-    local name = joystick:getName()
-    local index = joystick:getConnectedIndex()
-    print(string.format("Changing active gamepad to #%d '%s' button:%s.", index, name, button))
+    (context.gamepadpressed or noop)(context, joystick, button)
+
 end
 
 
@@ -168,3 +162,6 @@ function serialize(o, prefix)
     end
     return s
 end
+
+
+function noop() end
