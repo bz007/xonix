@@ -21,7 +21,7 @@ function Player:Init()
 end
 
 
-function Player:Event(key)
+function Player:keypressed(key)
     if key == 'down' then
         self.dir = DIR_DN
     elseif key == 'up' then
@@ -34,7 +34,7 @@ function Player:Event(key)
 end
 
 
-function Player:Draw()
+function Player:draw()
     love.graphics.setColor(1, 1, 1)
     love.graphics.circle("fill", OFFSET_X + player.x*CELL_SIZE_X - CELL_SIZE_X/2, 
                                  OFFSET_Y + player.y*CELL_SIZE_Y - CELL_SIZE_Y/2, CELL_SIZE_X/2)
@@ -48,7 +48,7 @@ function Player:Draw()
 end
 
 
-function Player:Update(dt)
+function Player:update(dt)
     if self.dir == DIR_NO then return end
 
     self.delta = self.delta + self.speed*dt
@@ -105,7 +105,7 @@ function Player:Update(dt)
                 level = level + 1
                 lives = lives + 1
 
-                game:Init(level)
+                game:make_field(level)
             end
         end
     end

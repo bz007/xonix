@@ -31,6 +31,7 @@ require 'player'
 require 'game'
 require 'home'
 require 'dialog'
+require 'hiscore'
 
 -- ================ главная часть ===========================
 
@@ -55,34 +56,10 @@ function love.load()
     home = Home:New()
 
     -- начинаем с домашнего экрана
-    context = home
-end
 
-
-function love.update(dt)
-    context:Update(dt)
-end
-
-
-function love.draw()
-    context:Draw()
-end
-
-
-function love.keypressed(key)
-    context:Event(key)
-end
-
-
-function love.gamepadaxis(joystick, axis, value)
-
-    (context.gamepadaxis or noop)(context, joystick, axis, value)
-
-end
-
-function love.gamepadpressed(joystick, button)
-
-    (context.gamepadpressed or noop)(context, joystick, button)
+    context = require "gamestate"
+    context.registerEvents()
+    context.switch(home)
 
 end
 
@@ -102,25 +79,12 @@ function love.resize(w, h)
     OFFSET_X    = (screen.width  - CELL_SIZE_X*MAX_X) / 2
     OFFSET_Y    = (screen.height - STAUS_LINE_H - CELL_SIZE_Y*MAX_Y) / 2
 
-    fontH = love.graphics.newFont('res/Moulin.otf', screen.height/4)
-    fontM = love.graphics.newFont('res/Moulin.otf', screen.height/8)
-    fontS = love.graphics.newFont('res/Moulin.otf', STAUS_LINE_H)
-    font  = love.graphics.newFont('res/Moulin.otf', screen.height/15)
+    fontH = love.graphics.newFont('res/Moulin.otf', screen.height/4)  -- huge
+    fontM = love.graphics.newFont('res/Moulin.otf', screen.height/8)  -- medium
+    font  = love.graphics.newFont('res/Moulin.otf', screen.height/18) -- usual
+    fontS = love.graphics.newFont('res/Moulin.otf', STAUS_LINE_H)     -- status
 end
 
-
-function string:split(delimiter) --Not by me
-    local result = {}
-    local from  = 1
-    local delim_from, delim_to = string.find( self, delimiter, from  )
-    while delim_from do
-        table.insert( result, string.sub( self, from , delim_from-1 ) )
-        from = delim_to + 1
-        delim_from, delim_to = string.find( self, delimiter, from  )
-    end
-    table.insert( result, string.sub( self, from  ) )
-    return result
-end
 
 
 function saveconfig()
@@ -129,8 +93,8 @@ end
 
 
 function loadconfig()
-    config = {  hiscore={{0,"",""}, {0,"",""}, {0,"",""}, {0,"",""}, {0,"",""}},
-                volume=.2, music=true, fullscreen=false, control="kbd"}
+    config = {  hiscore={{0,1,"",""}, {0,1,"",""}, {0,1,"",""}, {0,1,"",""}, {0,1,"",""}},
+                volume=.2, music=true, fullscreen=false, control="kbd", name="nobody"}
     
     if love.filesystem.getInfo('xonix.cfg') then
 

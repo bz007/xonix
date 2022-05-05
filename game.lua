@@ -7,12 +7,10 @@ Game.__index = Game
 
 
 -- инициализация игры
-function Game:New(lvl)
+function Game:New()
 
-	level = lvl or 1
-	self:Init(level)
-
-    hiscore_ptr = nil
+    hiscore_ptr = 0
+    score = 0
 
     sound_gameover = love.audio.newSource('res/GameOver.ogg', 'static')
     sound_levelup  = love.audio.newSource('res/LevelUp.ogg',  'static')
@@ -23,21 +21,8 @@ function Game:New(lvl)
 end
 
 
-function Game:Event(key)
 
-    if key == 'escape' then
-        Dialog:New('Pause', ' Wait!')
-    elseif key == 'q' then
-        lives = 0
-        Game:Over()
-    end
-
-    player:Event(key)
-
-end
-
-
-function Game:Draw()
+function Game:draw()
     -- фон
     love.graphics.setColor(.1, .1, .1)
     love.graphics.rectangle("fill", OFFSET_X, OFFSET_Y, MAX_X*CELL_SIZE_X, MAX_Y*CELL_SIZE_Y)
@@ -64,37 +49,129 @@ function Game:Draw()
     -- точки
     love.graphics.setColor(0.9, 0.7, 0)
     for _, dot in pairs(indots) do
-        dot:Draw()
+        dot:draw()
     end
 
     love.graphics.setColor(0.9, 0.1, 0.5)
     for _, dot in pairs(outdots) do
-        dot:Draw()
+        dot:draw()
     end
 
     -- игрок
-    player:Draw()
+    player:draw()
 
 end
 
 
-function Game:Update(dt)
+function Game:update(dt)
 
-    player:Update(dt)
+    player:update(dt)
 
     for _, dot in pairs(indots) do
-           dot:Update(dt)
+           dot:update(dt)
     end
 
     for _, dot in pairs(outdots) do
-           dot:Update(dt)
+           dot:update(dt)
     end
 
 end
 
 
+local active_joystick = nil
+
+function Game:enter(prev_state, control, joystick)
+
+    self.control = control
+    active_joystick = joystick
+
+    level = 1
+    score = 0
+    lives = 3
+
+    game:make_field(level)
+
+end
+
+
+function Game:keypressed(key)
+
+    if self.control ~= 'kbd' then
+        return
+    end
+
+    if key == 'escape' then
+        Dialog:New('Pause', ' Wait!')
+    elseif key == 'q' then
+        lives = 0
+        Game:Over()
+    end
+
+    player:keypressed(key)
+
+end
+
+
+function Game:gamepadpressed(joystick, button)
+    if self.control == 'js' and active_joystick == joystick then
+        if button == 'a' then
+            Dialog:New('Pause', ' Wait!')
+        end
+    end
+end
+
+
+local joystick_limit = .8 -- чувствительность
+local ax = {leftx=0, lefty=0, rightx=0, righty=0}
+
+function Game:gamepadaxis(joystick, axis, value)
+
+    if self.control == 'js' and active_joystick == joystick then
+        ax[axis] = value
+
+        -- левый джойстик
+        if math.abs(ax.leftx) < joystick_limit then
+            if ax.lefty > joystick_limit then
+                player.dir = DIR_DN
+            elseif ax.lefty < -joystick_limit then
+                player.dir = DIR_UP
+            end
+        end
+        if math.abs(ax.lefty) < joystick_limit then
+            if ax.leftx > joystick_limit then
+                player.dir = DIR_RT
+            elseif ax.leftx < -joystick_limit then
+                player.dir = DIR_LT
+            end
+        end
+
+        -- правый джойстик
+        if math.abs(ax.rightx) < joystick_limit then
+            if ax.righty > joystick_limit then
+                player.dir = DIR_DN
+            elseif ax.righty < -joystick_limit then
+                player.dir = DIR_UP
+            end
+        end
+        if math.abs(ax.righty) < joystick_limit then
+            if ax.rightx > joystick_limit then
+                player.dir = DIR_RT
+            elseif ax.rightx < -joystick_limit then
+                player.dir = DIR_LT
+            end
+        end
+
+    end
+
+end
+
+
+-- =================== полезные вспомогательные фукции ===================
+
 function Game:Over()
 
+    pitchMod = 0.8 + love.math.random(0, 10)/25
+    sound_gameover:setPitch(pitchMod)
     sound_gameover:play()
 
     lives = lives - 1
@@ -109,9 +186,9 @@ function Game:Over()
         return
     end
 
-	context = home
+    -- context = home
+    context.switch(home)
 
-    Dialog:New('GAME ', 'OVER!')
 
     hiscore_ptr = 0
     if score > config.hiscore[#config.hiscore][1] then
@@ -120,31 +197,15 @@ function Game:Over()
         for i = #config.hiscore, 1, -1 do
             if config.hiscore[i][1] < score then hiscore_ptr = i end
         end
-        table.insert(config.hiscore, hiscore_ptr, {score, "", os.date("%d.%m.%Y")})
-        table.remove(config.hiscore)
-        saveconfig()
+        HiScore:New()
     end
 
-end
-
-
-function Game:Start(control)
-
-    self.control = control
-
-    level = 1
-    score = 0
-    lives = 3
-
-    game:Init(level)
-
-    context = game
+    Dialog:New('GAME ', 'OVER!')
 
 end
 
 
-
-function Game:Init(level)
+function Game:make_field(level)
 
     -- инициализация поля
     field = {}
@@ -180,59 +241,6 @@ function Game:Init(level)
 end
 
 
-function Game:gamepadpressed(joystick, button)
-    if self.control == 'js' and active_joystick == joystick then
-        if button == 'a' then
-            Dialog:New('Pause', ' Wait!')
-        end
-    end
-end
-
-
-local ax = {leftx=0, lefty=0, rightx=0, righty=0}
-local joystick_limit = .8
-
-function Game:gamepadaxis(joystick, axis, value)
-
-    if self.control == 'js' and active_joystick == joystick then
-        ax[axis] = value
-        -- print(string.format("Gamepad %s axis: %s, %s", joystick:getName(), axis, value))
-        if math.abs(ax.leftx) < joystick_limit then
-            if ax.lefty > joystick_limit then
-                player.dir = DIR_DN
-            elseif ax.lefty < -joystick_limit then
-                player.dir = DIR_UP
-            end
-        end
-        if math.abs(ax.lefty) < joystick_limit then
-            if ax.leftx > joystick_limit then
-                player.dir = DIR_RT
-            elseif ax.leftx < -joystick_limit then
-                player.dir = DIR_LT
-            end
-        end
-
-        if math.abs(ax.rightx) < joystick_limit then
-            if ax.righty > joystick_limit then
-                player.dir = DIR_DN
-            elseif ax.righty < -joystick_limit then
-                player.dir = DIR_UP
-            end
-        end
-        if math.abs(ax.righty) < joystick_limit then
-            if ax.rightx > joystick_limit then
-                player.dir = DIR_RT
-            elseif ax.rightx < -joystick_limit then
-                player.dir = DIR_LT
-            end
-        end
-
-    end
-
-end
-
--- =================== полезные вспомогательные фукции ===================
-
 function print_field()
     for i = 1, MAX_X do
         for j = 1, MAX_Y do
@@ -242,5 +250,6 @@ function print_field()
     end
     io.flush()
 end
+
 
 

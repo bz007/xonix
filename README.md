@@ -14,13 +14,13 @@ Just download latest xonix.love from Releases page and open it with installed L�
 
 ## Game Control
 
-The game can be controlled with keyboard (arrows ← → ↑ ↓ for movements and Enter as Fire) or gamepad (any joystick for movements and A as Fire). Also in main screen you can press F to toggle fullscreen and M to toggle background music, use + and - to adjust its volume. Button Q is for quit game, and Esc or Fire is used for pause during the game. When you press Fire button in main screen then game control is fixed to device where you press Fire and game starts.
+The game can be controlled with keyboard (arrows `←` `→` `↑` `↓` for movements and `Enter` as Fire) or gamepad (any joystick for movements and `A` as Fire). Also in main screen you can press `F` to toggle fullscreen and `M` to toggle background music, use `+` and `-` to adjust its volume. Button `Q` is for quit game, and `Esc` or Fire is used for pause during the game. When you press Fire button in main screen then game control is locked to device where you press Fire and game starts.
+
 
 ## TODO
- * add player name in hiscore
  * separate setup screen with video, music and game control?
  * clean up most global variables?
- * more useful context switching?
+ * more useful context switching?  Done with [hump.gamestate](https://github.com/vrld/hump)
 
 
 ## Just some copyright notices

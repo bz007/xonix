@@ -7,26 +7,29 @@ Dialog.__index = Dialog
 
 function Dialog:New(msg1, msg2)
 
-	self.msg1 = msg1
-	self.msg2 = msg2
+    self.msg1 = msg1
+    self.msg2 = msg2
 
-	self.state = 0
+    self.state = 0
 
-	self.context_save = context
-	context = self
+    self.context_save = context.current()
 
-	return self
+    context.push(self)
+
+    return self
 end
 
 
-function Dialog:Draw()
+function Dialog:draw()
 
-    local c1 = {1,.3,.3}; c2 = {0,1,0}; color = {c1, c2}
+    local c1 = {1,.3,.3}
+    local c2 = {0,1,0}
+    local color = {c1, c2}
 
     n = math.floor(self.state * 2) % 2
     msg = {color[1+n], self.msg1, color[2-n], self.msg2}
 
-    self.context_save:Draw()
+    self.context_save:draw()
 
     love.graphics.setColor(.7, .7, .7)
     love.graphics.rectangle('fill', screen.width/8, screen.height/4, screen.width*3/4, screen.height/2)
@@ -40,30 +43,30 @@ function Dialog:Draw()
 end
 
 
-function Dialog:Update(dt)
-	self.state = self.state + dt
+function Dialog:update(dt)
+    self.state = self.state + dt
 
     if self.state > 1 then
-    	self.state = self.state - 1
+        self.state = self.state - 1
     end
 end
 
 
-function Dialog:Event(key)
+function Dialog:keypressed(key)
 
-	if key == 'return' then
-		context = self.context_save
-	elseif key == 'escape' then
-		context = self.context_save
-	elseif key == 'q' then
-		love.event.quit()
-	end
+    if key == 'return' or key == 'escape' then
+        -- context = self.context_save
+        return context.pop()
+    elseif key == 'q' then
+        love.event.quit()
+    end
 
 end
 
 
 function Dialog:gamepadpressed(joystick, button)
     if button == 'a' then
-        context = self.context_save
+        -- context = self.context_save
+        return context.pop()
     end
 end
